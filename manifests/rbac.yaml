@@ -41,4 +41,4 @@ metadata:
   name: awstargetgroup-controller
   namespace: default
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::397590882992:role/eksctl-cluster-in-existing-vpc-addon-iamservi-Role1-VvIrZXwkl4rn # Replace ACCOUNT_ID with your AWS account ID
+    eks.amazonaws.com/role-arn: <IAM role> # Replace ACCOUNT_ID with your AWS account ID
