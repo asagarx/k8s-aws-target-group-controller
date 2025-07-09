@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: awstargetgroup-controller
+  labels:
+    app: awstargetgroup-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: awstargetgroup-controller
+  template:
+    metadata:
+      labels:
+        app: awstargetgroup-controller
+    spec:
+      serviceAccountName: awstargetgroup-controller
+      containers:
+      - name: controller
+        image: 397590882992.dkr.ecr.us-east-1.amazonaws.com/aws-targetgroup-controller:latest
+        ports:
+        - containerPort: 8443
+        env:
+        - name: AWS_DEFAULT_REGION
+          value: "us-east-1"
+        - name: RECONCILE_INTERVAL
+          value: "20"
+        - name: KUBERNETES_SERVICE_HOST
+          value: "kubernetes.default.svc"
+        - name: KUBERNETES_SERVICE_PORT
+          value: "443"
+        - name: CERT_PATH
+          value: "/etc/webhook/certs/tls.crt"
+        - name: KEY_PATH
+          value: "/etc/webhook/certs/tls.key"
+        - name: K8S_CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: cluster-info
+              key: cluster-name
+        volumeMounts:
+        - name: webhook-certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+      volumes:
+      - name: webhook-certs
+        secret:
+          secretName: webhook-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awstargetgroup-webhook
+spec:
+  selector:
+    app: awstargetgroup-controller
+  ports:
+  - port: 8443
+    targetPort: 8443

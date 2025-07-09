@@ -1,0 +1,45 @@
+apiVersion: aws.k8s.io/v1
+kind: AWSTargetGroup
+metadata:
+  name: sample-target-group
+  annotations:
+    # Health Check Configuration
+    aws.k8s.io.targetGroup/healthCheck.enabled: "true"
+    aws.k8s.io.targetGroup/healthCheck.healthyThresholdCount: "3"
+    aws.k8s.io.targetGroup/healthCheck.unhealthyThresholdCount: "2"
+    aws.k8s.io.targetGroup/healthCheck.HealthCheckIntervalSeconds: "30"
+    aws.k8s.io.targetGroup/healthCheck.HealthCheckTimeoutSeconds: "5"
+    aws.k8s.io.targetGroup/healthCheck.path: "/health"
+    aws.k8s.io.targetGroup/healthCheck.port: "traffic-port"
+    aws.k8s.io.targetGroup/healthCheck.protocol: "HTTP"
+    
+    # Target Group Attributes
+    aws.k8s.io.targetGroup/attribute.deregistration_delay.timeout_seconds: "300"
+    aws.k8s.io.targetGroup/attribute.stickiness.enabled: "true"
+    aws.k8s.io.targetGroup/attribute.stickiness.type: "lb_cookie"
+    aws.k8s.io.targetGroup/attribute.stickiness.lb_cookie.duration_seconds: "86400"
+    
+    # Tags
+    aws.k8s.io.targetGroup/tag.Environment: "production"
+    aws.k8s.io.targetGroup/tag.Team: "platform"
+
+    # Listener Configuration
+    aws.k8s.io.loadBalancer/listener.port: "443"
+    aws.k8s.io.loadBalancer/listener.protocol: "HTTPS"
+    aws.k8s.io.loadBalancer/listener.priority: "100"
+    aws.k8s.io.loadBalancer/listener.certificateArn: "arn:aws:acm:region:account:certificate/certificate-id"
+    aws.k8s.io.loadBalancer/listener.condition.0.field: "path-pattern"
+    aws.k8s.io.loadBalancer/listener.condition.0.values: "/api/*"
+    aws.k8s.io.loadBalancer/listener.condition.1.field: "host-header"
+    aws.k8s.io.loadBalancer/listener.condition.1.values: "api.example.com"
+spec:
+  targetType: instance
+  port: 80
+  protocol: HTTP
+  vpcId: vpc-12345678
+  region: us-west-2
+  serviceRef:
+    name: my-service
+    port: 80
+  loadBalancerRef:
+    name: my-application-lb

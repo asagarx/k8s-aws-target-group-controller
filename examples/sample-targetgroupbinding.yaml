@@ -1,0 +1,9 @@
+apiVersion: aws.k8s.io/v1
+kind: TargetGroupBinding
+metadata:
+  name: sample-target-group-binding
+spec:
+  targetGroupARN: arn:aws:elasticloadbalancing:region:account-id:targetgroup/sample-target-group/1234567890
+  serviceRef:
+    name: my-service
+    port: 80

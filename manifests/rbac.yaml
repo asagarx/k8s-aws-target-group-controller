@@ -1,0 +1,44 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: awstargetgroup-controller
+rules:
+- apiGroups: ["aws.k8s.io"]
+  resources: ["awstargetgroups"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["aws.k8s.io"]
+  resources: ["awstargetgroups/status"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: ["elbv2.k8s.aws"]
+  resources: ["targetgroupbindings"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: ["elbv2.k8s.aws"]
+  resources: ["targetgroupbindings/status"]
+  verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: awstargetgroup-controller
+subjects:
+- kind: ServiceAccount
+  name: awstargetgroup-controller
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: awstargetgroup-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: awstargetgroup-controller
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::397590882992:role/eksctl-cluster-in-existing-vpc-addon-iamservi-Role1-VvIrZXwkl4rn # Replace ACCOUNT_ID with your AWS account ID

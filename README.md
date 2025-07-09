@@ -16,9 +16,37 @@ This Kubernetes controller automates the management of AWS Target Groups by prov
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
 ```
 
-2. How to deploy controller:
+2. Create AWS credentials secret:
 ```bash
-make deploy
+kubectl create secret generic aws-credentials \
+  --from-literal=access-key=YOUR_AWS_ACCESS_KEY_ID \
+  --from-literal=secret-key=YOUR_AWS_SECRET_ACCESS_KEY
+```
+
+3. Apply the CRD and other manifests:
+```bash
+kubectl apply -f manifests/awstargetgroup-crd.yaml
+kubectl apply -f manifests/cert-manager.yaml
+kubectl apply -f manifests/webhook-configuration.yaml
+kubectl apply -f manifests/deployment.yaml
+```
+
+4. Build and push the controller image to ECR:
+```bash
+# Make the build script executable
+chmod +x build.sh
+
+# Set your AWS region (optional, defaults to us-west-2)
+export AWS_REGION=us-west-2
+
+# Set your ECR repository name (optional, defaults to aws-targetgroup-controller)
+export ECR_REPO_NAME=aws-targetgroup-controller
+
+# Set the image tag (optional, defaults to latest)
+export IMAGE_TAG=latest
+
+# Run the build script
+./build.sh
 ```
 
 ## Usage
@@ -144,8 +172,13 @@ The controller will handle:
 
 ## Configuration
 
-The controller can be configured using command line arguments:
+The controller can be configured using environment variables and command line arguments:
 
+Environment Variables:
+- `AWS_ACCESS_KEY_ID`: AWS access key (required)
+- `AWS_SECRET_ACCESS_KEY`: AWS secret key (required)
+- `CERT_PATH`: Path to TLS certificate for webhook (default: "/etc/webhook/certs/tls.crt")
+- `KEY_PATH`: Path to TLS key for webhook (default: "/etc/webhook/certs/tls.key")
 
 Command Line Arguments:
 - `--periodic-check-interval`: Interval in seconds for checking AWS target groups (default: 5)
