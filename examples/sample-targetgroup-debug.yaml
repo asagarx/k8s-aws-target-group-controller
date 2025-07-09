@@ -1,0 +1,39 @@
+apiVersion: aws.k8s.io/v1
+kind: AWSTargetGroup
+metadata:
+  name: sample-target-group
+  annotations:
+    # Health Check Configuration
+    aws.k8s.io.targetGroup/healthCheck.enabled: "true"
+    aws.k8s.io.targetGroup/healthCheck.healthyThresholdCount: "3"
+    aws.k8s.io.targetGroup/healthCheck.unhealthyThresholdCount: "2"
+    aws.k8s.io.targetGroup/healthCheck.HealthCheckIntervalSeconds: "30"
+    aws.k8s.io.targetGroup/healthCheck.HealthCheckTimeoutSeconds: "5"
+    aws.k8s.io.targetGroup/healthCheck.port: "traffic-port"
+    aws.k8s.io.targetGroup/healthCheck.protocol: "TCP"
+    
+    # Target Group Attributes
+    aws.k8s.io.targetGroup/attribute.deregistration_delay.timeout_seconds: "300"
+    aws.k8s.io.targetGroup/attribute.stickiness.enabled: "true"
+    
+    # Tags
+    aws.k8s.io.targetGroup/tag.Environment: "production"
+    aws.k8s.io.targetGroup/tag.Team: "platform"
+
+    # Listener Configuration
+    aws.k8s.io.loadBalancer/listener.port: "84"
+    aws.k8s.io.loadBalancer/listener.protocol: "TCP"
+    aws.k8s.io.loadBalancer/listener.priority: "100"
+    aws.k8s.io.loadBalancer/listener.condition.0.field: "path-pattern"
+    aws.k8s.io.loadBalancer/listener.condition.0.values: "/api/*"
+spec:
+  targetType: instance
+  port: 8081
+  protocol: TCP
+  vpcId: vpc-0641c8a4e1b719ff7
+  region: us-east-1
+  serviceRef:
+    name: classroom-events-service
+    port: 8081
+  loadBalancerRef:
+    name: ae3cc68f215a348db9df87efd069a732

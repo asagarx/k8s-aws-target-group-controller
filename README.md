@@ -1,6 +1,6 @@
 # AWS Target Group Controller
 
-This Kubernetes controller automates the management of AWS Target Groups by providing a seamless integration between Kubernetes and AWS Elastic Load Balancing. It enables declarative configuration of AWS Target Groups using Custom Resource Definitions (CRDs), supports both Application Load Balancers (ALB) and Network Load Balancers (NLB), and includes a mutation webhook for automatic label management. The controller handles the complete lifecycle of target groups, including creation, updates, and deletion, while maintaining synchronization between Kubernetes services and AWS load balancer targets through TargetGroupBinding resources.
+This Kubernetes controller automates the management of AWS Target Groups by providing a seamless integration between Kubernetes and AWS Elastic Load Balancing. This is a helper tool for [AWS load balancer controller](https://github.com/kubernetes-sigs/aws-load-balancer-controller) to reduce the gap between targetGroupBinding and targetGroup and listener configurations. It enables declarative configuration of AWS Target Groups using Custom Resource Definitions (CRDs), supports both Application Load Balancers (ALB) and Network Load Balancers (NLB), and includes a mutation webhook for automatic label management. The controller handles the complete lifecycle of target groups, including creation, updates, and deletion, while maintaining synchronization between Kubernetes services and AWS load balancer targets through TargetGroupBinding resources.
 
 ## Prerequisites
 
@@ -16,9 +16,40 @@ This Kubernetes controller automates the management of AWS Target Groups by prov
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
 ```
 
-2. How to deploy controller:
+2. Build and deploy the controller:
+
+The project includes a Makefile with the following targets:
+- `make build`: Build and push the controller image to ECR
+- `make deploy`: Deploy the controller to your Kubernetes cluster
+- `make destroy`: Remove the controller and associated resources
+- `make clean`: Clean up local Docker images
+- `make help`: Display help information about available targets
+
+You can configure the build process using the following environment variables:
 ```bash
+# Set your AWS region (optional, defaults to us-east-1)
+export AWS_REGION=us-east-1
+
+# Set your ECR repository name (optional, defaults to aws-targetgroup-controller)
+export ECR_REPO_NAME=aws-targetgroup-controller
+
+# Set the image tag (optional, defaults to latest)
+export IMAGE_TAG=latest
+```
+
+To build and deploy:
+```bash
+# Build and push the controller image
+make build
+
+# Deploy the controller to your cluster
 make deploy
+```
+
+To remove the controller:
+```bash
+# Remove all controller resources from the cluster
+make destroy
 ```
 
 ## Usage
@@ -40,6 +71,8 @@ spec:
 ```
 
 The controller will create the target group in AWS and the mutation webhook will add default labels.
+
+For a complete reference of all available annotations and their usage, please see [annotations.md](annotations.md).
 
 ### End-to-End Examples
 
@@ -145,7 +178,6 @@ The controller will handle:
 ## Configuration
 
 The controller can be configured using command line arguments:
-
 
 Command Line Arguments:
 - `--periodic-check-interval`: Interval in seconds for checking AWS target groups (default: 5)
