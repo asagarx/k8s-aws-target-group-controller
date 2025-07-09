@@ -1,6 +1,6 @@
 # AWS Target Group Controller
 
-This Kubernetes controller automates the management of AWS Target Groups by providing a seamless integration between Kubernetes and AWS Elastic Load Balancing. It enables declarative configuration of AWS Target Groups using Custom Resource Definitions (CRDs), supports both Application Load Balancers (ALB) and Network Load Balancers (NLB), and includes a mutation webhook for automatic label management. The controller handles the complete lifecycle of target groups, including creation, updates, and deletion, while maintaining synchronization between Kubernetes services and AWS load balancer targets through TargetGroupBinding resources.
+This Kubernetes controller automates the management of AWS Target Groups by providing a seamless integration between Kubernetes and AWS Elastic Load Balancing. This is a helper tool for [AWS load balancer controller](https://github.com/kubernetes-sigs/aws-load-balancer-controller) to reduce the gap between targetGroupBinding and targetGroup and listener configurations. It enables declarative configuration of AWS Target Groups using Custom Resource Definitions (CRDs), supports both Application Load Balancers (ALB) and Network Load Balancers (NLB), and includes a mutation webhook for automatic label management. The controller handles the complete lifecycle of target groups, including creation, updates, and deletion, while maintaining synchronization between Kubernetes services and AWS load balancer targets through TargetGroupBinding resources.
 
 ## Prerequisites
 
@@ -16,37 +16,40 @@ This Kubernetes controller automates the management of AWS Target Groups by prov
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
 ```
 
-2. Create AWS credentials secret:
-```bash
-kubectl create secret generic aws-credentials \
-  --from-literal=access-key=YOUR_AWS_ACCESS_KEY_ID \
-  --from-literal=secret-key=YOUR_AWS_SECRET_ACCESS_KEY
-```
+2. Build and deploy the controller:
 
-3. Apply the CRD and other manifests:
-```bash
-kubectl apply -f manifests/awstargetgroup-crd.yaml
-kubectl apply -f manifests/cert-manager.yaml
-kubectl apply -f manifests/webhook-configuration.yaml
-kubectl apply -f manifests/deployment.yaml
-```
+The project includes a Makefile with the following targets:
+- `make build`: Build and push the controller image to ECR
+- `make deploy`: Deploy the controller to your Kubernetes cluster
+- `make destroy`: Remove the controller and associated resources
+- `make clean`: Clean up local Docker images
+- `make help`: Display help information about available targets
 
-4. Build and push the controller image to ECR:
+You can configure the build process using the following environment variables:
 ```bash
-# Make the build script executable
-chmod +x build.sh
-
-# Set your AWS region (optional, defaults to us-west-2)
-export AWS_REGION=us-west-2
+# Set your AWS region (optional, defaults to us-east-1)
+export AWS_REGION=us-east-1
 
 # Set your ECR repository name (optional, defaults to aws-targetgroup-controller)
 export ECR_REPO_NAME=aws-targetgroup-controller
 
 # Set the image tag (optional, defaults to latest)
 export IMAGE_TAG=latest
+```
 
-# Run the build script
-./build.sh
+To build and deploy:
+```bash
+# Build and push the controller image
+make build
+
+# Deploy the controller to your cluster
+make deploy
+```
+
+To remove the controller:
+```bash
+# Remove all controller resources from the cluster
+make destroy
 ```
 
 ## Usage
@@ -174,13 +177,7 @@ The controller will handle:
 
 ## Configuration
 
-The controller can be configured using environment variables and command line arguments:
-
-Environment Variables:
-- `AWS_ACCESS_KEY_ID`: AWS access key (required)
-- `AWS_SECRET_ACCESS_KEY`: AWS secret key (required)
-- `CERT_PATH`: Path to TLS certificate for webhook (default: "/etc/webhook/certs/tls.crt")
-- `KEY_PATH`: Path to TLS key for webhook (default: "/etc/webhook/certs/tls.key")
+The controller can be configured using command line arguments:
 
 Command Line Arguments:
 - `--periodic-check-interval`: Interval in seconds for checking AWS target groups (default: 5)
