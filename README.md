@@ -69,6 +69,8 @@ spec:
 
 The controller will create the target group in AWS and the mutation webhook will add default labels.
 
+For a complete reference of all available annotations and their usage, please see [annotations.md](annotations.md).
+
 ### End-to-End Examples
 
 Here's a complete walkthrough of setting up and using the AWS Target Group Controller:
